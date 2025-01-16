@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+package user;
+
+// Go package option for generated code placement.
+option go_package = "./pkg/pb";
+
+// The User message represents a user entity in the system.
+message User {
+    uint64 id = 1;          // Unique ID of the user.
+    string name = 2;        // Name of the user.
+    string email = 3;       // Email address of the user.
+    string phone = 4;       // Phone number of the user.
+}
+
+// Request message for GetUserByID.
+message GetUserByIDRequest {
+    uint64 id = 1;          // The ID of the user to retrieve.
+}
+
+// Response message for GetUserByID.
+message GetUserByIDResponse {
+    User user = 1;          // The retrieved user details.
+}
+
+// Request message for CreateUser.
+message CreateUserRequest {
+    string name = 1;        // Name of the user.
+    string email = 2;       // Email address of the user.
+    string phone = 3;       // Phone number of the user.
+}
+
+// Response message for CreateUser.
+message CreateUserResponse {
+    uint64 id = 1;          // ID of the created user.
+    string message = 2;     // Success or failure message.
+}
+
+// Request message for UpdateUser.
+message UpdateUserRequest {
+    uint64 id = 1;          // ID of the user to update.
+    string name = 2;        // Updated name of the user.
+    string email = 3;       // Updated email address of the user.
+    string phone = 4;       // Updated phone number of the user.
+}
+
+// Response message for UpdateUser.
+message UpdateUserResponse {
+    string message = 1;     // Success or failure message.
+}
+
+// Request message for DeleteUser.
+message DeleteUserRequest {
+    uint64 id = 1;          // The ID of the user to delete.
+}
+
+// Response message for DeleteUser.
+message DeleteUserResponse {
+    string message = 1;     // Success or failure message.
+}
+
+// Response message for ListAllUsers.
+message ListAllUsersResponse {
+    repeated User users = 1; // List of all users in the system.
+}
+
+message empty {}
+
+// The UserService defines the gRPC methods for user-related operations.
+service UserService {
+    // Create a new user.
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+
+    // Retrieve a user by their ID.
+    rpc GetUserByID(GetUserByIDRequest) returns (GetUserByIDResponse);
+
+    // Update an existing user's details.
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+
+    // Delete a user by their ID.
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+
+    // List all users in the system.
+    rpc ListAllUsers(empty) returns (ListAllUsersResponse);
+}

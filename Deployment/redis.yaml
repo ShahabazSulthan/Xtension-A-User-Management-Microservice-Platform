@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  labels:
+    app: redis
+    env: production
+    project: user_management
+spec:
+  serviceName: redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      env: production
+      project: user_management
+  template:
+    metadata:
+      labels:
+        app: redis
+        env: production
+        project: user_management
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.0.15
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+      restartPolicy: Always
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+    env: production
+    project: user_management
+spec:
+  clusterIP: None
+  selector:
+    app: redis
+    env: production
+    project: user_management
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  postgresdb:
+    image: postgres:16.2
+    restart: always
+    container_name: postgres_db
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    networks:
+      - user_net_bridge
+    volumes:
+      - project-volume:/var/lib/postgresql/data
+    hostname: postgresdb
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7.0.15
+    container_name: redis
+    networks:
+      - user_net_bridge
+    ports:
+      - "6380:6379"
+
+  microservice_one:
+    build:
+      context: ./Microservice=1   # Ensure this directory exists and contains Dockerfile.one
+      dockerfile: Dockerfile.one  # Make sure Dockerfile.one is in the specified context folder
+    image: microservice_one:1.0
+    restart: unless-stopped
+    container_name: microservice-one
+    depends_on:
+      - postgresdb
+    networks:
+      - user_net_bridge
+    ports:
+      - "50002:50001"
+    hostname: friendzyauth
+
+  microservice_two:
+    build:
+      context: ./Microservice=2   # Ensure this directory exists and contains Dockerfile.two
+      dockerfile: Dockerfile.two  # Make sure Dockerfile.two is in the specified context folder
+    image: microservice_two:1.0
+    restart: unless-stopped
+    container_name: microservice_two
+    networks:
+      - user_net_bridge
+    ports:
+      - "8000:8000"
+
+networks:
+  user_net_bridge:
+    driver: bridge
+
+volumes:
+  project-volume:
+    driver: local

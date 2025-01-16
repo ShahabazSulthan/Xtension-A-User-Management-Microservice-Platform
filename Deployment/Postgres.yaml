@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  labels:
+    app: postgresdb
+    env: production
+    project: user_management
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresdb
+  serviceName: postgresdb
+  template:
+    metadata:
+      labels:
+        app: postgresdb
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16.2
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "12345"
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres-data 
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 100Mi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresdb
+  labels:
+    app: postgresdb
+    env: production
+    project: user_management
+spec:
+  type: ClusterIP
+  selector:
+    app: postgresdb
+  ports:
+    - port: 5432 
+      targetPort: 5432
